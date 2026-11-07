@@ -1,10 +1,12 @@
 import { BUILDINGS, GAME_CONFIG, isBuildingType } from '../data/gameConfig';
 import { canPlace, remainingBudget, selectionError } from '../domain/validation';
-import type { BuildingInstance, BuildingType, GameAction, GameState, ValidationResult } from '../domain/types';
+import { evaluateCity } from '../domain/economy';
+import type { BuildingInstance, BuildingType, Evaluation, GameAction, GameState, ValidationResult } from '../domain/types';
 
 export interface GameStore {
   getState(): GameState;
   getRemainingBudget(): number;
+  getEvaluation(): Evaluation;
   getBuildingCount(type: BuildingType): number;
   getSelectionError(type: BuildingType): string | null;
   canUndo(): boolean;
@@ -50,6 +52,7 @@ export function createGameStore(): GameStore {
   return {
     getState: () => state,
     getRemainingBudget: () => remainingBudget(state),
+    getEvaluation: () => evaluateCity(state),
     getBuildingCount: (type) => state.placed.filter((building) => building.type === type).length,
     getSelectionError: (type) => selectionError(state, type),
     canUndo: () => undoSnapshot !== null,
@@ -63,9 +66,21 @@ export function createGameStore(): GameStore {
         update(emptyState());
         return ok;
       }
+      if (action.type === 'CONTINUE') {
+        if (state.phase !== 'result') return fail('当前没有待关闭的结果。');
+        update({ phase: 'playing' });
+        return ok;
+      }
       if (state.phase !== 'playing') return fail('请先继续调整布局。');
 
       switch (action.type) {
+        case 'SUBMIT': {
+          const evaluation = evaluateCity(state);
+          if (!evaluation.complete) return { valid: false, errors: evaluation.errors };
+          // 完整但未达经济目标的布局也进入结果；提交不写入或清空撤销快照。
+          update({ phase: 'result', mode: 'select', selectedType: null, selectedBuildingId: null });
+          return ok;
+        }
         case 'SELECT_TYPE': {
           if (action.buildingType !== null) {
             if (!isBuildingType(action.buildingType)) return fail('未知的建筑类型。');

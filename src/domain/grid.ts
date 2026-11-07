@@ -21,3 +21,14 @@ export function buildingsOverlap(a: BuildingInstance, b: BuildingInstance): bool
   const occupied = new Set(footprintCells(a).map(({ x, y }) => `${x},${y}`));
   return footprintCells(b).some(({ x, y }) => occupied.has(`${x},${y}`));
 }
+
+/** 设施范围使用占地格之间的最小距离，不能以模型中心或欧氏距离替代。 */
+export function minManhattanDistance(a: BuildingInstance, b: BuildingInstance): number {
+  let distance = Number.POSITIVE_INFINITY;
+  for (const first of footprintCells(a)) {
+    for (const second of footprintCells(b)) {
+      distance = Math.min(distance, Math.abs(first.x - second.x) + Math.abs(first.y - second.y));
+    }
+  }
+  return distance;
+}

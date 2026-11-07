@@ -9,6 +9,7 @@ import type { BuildingInstance, BuildingType, ValidationResult } from '../domain
 import type { GameStore } from '../state/gameStore';
 import { cellToWorld, GROUND_Y } from './coordinates';
 import type { SceneManager } from './SceneManager';
+import { SpatialOverlay } from './SpatialOverlay';
 
 const MODEL_HEIGHT: Record<BuildingType, number> = { factory: 1.5, house: 1, park: 0.8, shop: 0.8 };
 
@@ -32,9 +33,11 @@ export class ScenePresenter {
   private readonly treeMaterial = new MeshStandardMaterial({ color: '#4f7551', roughness: 1 });
   private readonly darkMaterial = new MeshStandardMaterial({ color: '#6e685a', roughness: 1 });
   private readonly unsubscribe: () => void;
+  private readonly spatial: SpatialOverlay;
   private lastPlaced: readonly BuildingInstance[] | null = null;
 
   constructor(private readonly manager: SceneManager, private readonly store: GameStore) {
+    this.spatial = new SpatialOverlay(manager.scene);
     const capacity = Math.max(...BUILDING_TYPES.map((type) => BUILDINGS[type].width * BUILDINGS[type].depth));
     for (let i = 0; i < capacity; i += 1) {
       const tile = new Mesh(this.previewGeometry, this.previewMaterial);
@@ -56,6 +59,9 @@ export class ScenePresenter {
 
   public showPreview(candidate: BuildingInstance | null, validation?: ValidationResult): void {
     this.preview.visible = candidate !== null;
+    const factory = candidate?.type === 'factory' && validation?.valid
+      ? candidate : this.store.getState().placed.find((building) => building.type === 'factory');
+    this.spatial.showFactory(factory);
     if (!candidate) return;
     this.previewMaterial.color.set(validation?.valid ? '#509569' : '#c15245');
     const cells = footprintCells(candidate);
@@ -71,6 +77,7 @@ export class ScenePresenter {
 
   public dispose(): void {
     this.unsubscribe();
+    this.spatial.dispose();
     this.manager.scene.remove(this.models, this.proxies, this.preview, this.outline);
     this.models.clear();
     this.proxies.clear();
@@ -98,6 +105,7 @@ export class ScenePresenter {
       }
       this.proxies.updateMatrixWorld(true);
       this.lastPlaced = state.placed;
+      this.spatial.showFactory(state.placed.find((building) => building.type === 'factory'));
     }
     const selected = state.placed.find((building) => building.id === state.selectedBuildingId);
     this.outline.visible = selected !== undefined;

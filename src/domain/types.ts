@@ -10,6 +10,8 @@ export interface BuildingDefinition {
   readonly cost: number;
   readonly limit: number;
   readonly color: string;
+  readonly net: number;
+  readonly satisfactionBonus: number;
 }
 
 export interface BuildingInstance {
@@ -32,7 +34,28 @@ export type ValidationResult =
   | { readonly valid: true }
   | { readonly valid: false; readonly errors: readonly string[] };
 
-/** S1 仅接入编辑动作；开始页与提交/结果动作在后续阶段添加。 */
+export interface HouseEvaluation {
+  readonly id: string;
+  readonly satisfaction: number;
+  readonly pollutionPenalty: number;
+  readonly facilityBonus: number;
+}
+
+export interface Evaluation {
+  readonly spending: number;
+  readonly remainingBudget: number;
+  readonly monthlyNet: number; // 沿用技术规范字段名，表示游戏经营期，不代表真实月收益。
+  readonly averageSatisfaction: number | null;
+  readonly score: number;
+  readonly complete: boolean;
+  readonly won: boolean;
+  readonly errors: readonly string[];
+  readonly houses: readonly HouseEvaluation[];
+  readonly title: string | null;
+  readonly explanation: string;
+}
+
+/** 开始页在 S4 接入；当前直接进入编辑，并支持提交及继续调整。 */
 export type GameAction =
   | { readonly type: 'SELECT_TYPE'; readonly buildingType: BuildingType | null }
   | { readonly type: 'SELECT_BUILDING'; readonly id: string | null }
@@ -42,4 +65,6 @@ export type GameAction =
   | { readonly type: 'DELETE'; readonly id: string }
   | { readonly type: 'CANCEL' }
   | { readonly type: 'UNDO' }
-  | { readonly type: 'RESET' };
+  | { readonly type: 'RESET' }
+  | { readonly type: 'SUBMIT' }
+  | { readonly type: 'CONTINUE' };

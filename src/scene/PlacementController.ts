@@ -65,6 +65,7 @@ export class PlacementController {
     }
     if (!this.prepareRay(this.lastPoint)) return;
     const state = this.store.getState();
+    if (state.phase !== 'playing') return;
     if (state.mode !== 'move') {
       const hit = this.raycaster.intersectObjects([...this.presenter.getSelectionProxies()], false)[0];
       const id: unknown = hit?.object.userData['buildingId'];
@@ -102,6 +103,7 @@ export class PlacementController {
   };
 
   private readonly onKey = (event: KeyboardEvent): void => {
+    if (this.store.getState().phase !== 'playing') return;
     if (event.key === 'Escape') {
       this.gesture = null;
       this.dispatch({ type: 'CANCEL' }, '已取消当前操作，布局保持不变。');
@@ -117,7 +119,7 @@ export class PlacementController {
   private refreshPreview(): void {
     const state = this.store.getState();
     this.manager.canvas.style.cursor = state.selectedType || state.mode === 'move' ? 'crosshair' : 'grab';
-    if (!this.lastPoint || (this.gesture && !this.gesture.isClick()) || !this.prepareRay(this.lastPoint)) {
+    if (state.phase !== 'playing' || !this.lastPoint || (this.gesture && !this.gesture.isClick()) || !this.prepareRay(this.lastPoint)) {
       this.presenter.showPreview(null);
       return;
     }

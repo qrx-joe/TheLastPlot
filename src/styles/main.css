@@ -85,7 +85,7 @@ h1 {
 }
 
 .hud h2 {
-  margin: 24px 0 6px;
+  margin: 18px 0 6px;
   font-size: 17px;
 }
 
@@ -106,7 +106,7 @@ h1 {
   display: grid;
   align-content: start;
   gap: 4px;
-  min-height: 112px;
+  min-height: 104px;
   padding: 12px;
   text-align: left;
 }
@@ -144,10 +144,84 @@ h1 {
 }
 
 .placement-feedback {
-  min-height: 64px;
+  min-height: 44px;
   margin: 16px 0 0;
   font-size: 13px;
   line-height: 1.7;
+}
+
+.city-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.city-metrics div {
+  display: grid;
+  gap: 4px;
+}
+
+.city-metrics span {
+  font-size: 12px;
+  color: #69715e;
+}
+
+.city-metrics strong {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.pollution-legend {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #79552e;
+}
+
+.pollution-legend span {
+  font-size: 18px;
+}
+
+.submit-planning {
+  width: 100%;
+  margin-top: 12px;
+  color: #f9f7f1;
+  background: #526a42;
+}
+
+.submit-planning:hover:enabled {
+  background: #405632;
+}
+
+#planning-result {
+  width: min(520px, calc(100vw - 40px));
+  padding: 28px;
+  border: 1px solid #b5bba8;
+  border-radius: 10px;
+  color: #333a30;
+  background: #f9f7f1;
+  line-height: 1.8;
+}
+
+#planning-result::backdrop {
+  background: rgb(30 38 26 / 35%);
+}
+
+#planning-result h2 {
+  margin: 0 0 16px;
+  font-size: 24px;
+}
+
+#planning-result-errors {
+  padding-left: 22px;
+  color: #a44436;
+}
+
+.result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
 }
 
 .placement-feedback--error {
