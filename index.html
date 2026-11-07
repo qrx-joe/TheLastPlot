@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4efe6" />
+    <meta name="description" content="最后一块地：一块小小的土地，一场关于空间与取舍的规划挑战。" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>最后一块地 · The Last Plot</title>
+  </head>
+  <body>
+    <main class="app">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">THE LAST PLOT</p>
+          <h1>最后一块地</h1>
+        </div>
+        <span class="preview-label">地块预览</span>
+      </header>
+
+      <section class="viewport" aria-label="地块预览">
+        <div id="scene" class="scene"></div>
+        <div class="scene-toolbar">
+          <p id="scene-status" role="status">正在准备地块…</p>
+          <button id="reset-camera" type="button" disabled>复位视角</button>
+        </div>
+      </section>
+
+      <footer class="controls-hint">
+        <span>拖动旋转</span>
+        <span>滚轮缩放</span>
+      </footer>
+      <noscript>请启用 JavaScript 后查看三维地块。</noscript>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
