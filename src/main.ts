@@ -2,6 +2,7 @@ import { GAME_CONFIG } from './data/gameConfig';
 import { SceneManager } from './scene/SceneManager';
 import { ScenePresenter } from './scene/ScenePresenter';
 import { PlacementController } from './scene/PlacementController';
+import { AssetLoader } from './scene/AssetLoader';
 import { createGameStore } from './state/gameStore';
 import { HUD } from './ui/HUD';
 import './styles/main.css';
@@ -18,6 +19,9 @@ if (!container || !status || !resetButton || !hudContainer) {
 const listeners = new AbortController();
 const store = createGameStore();
 const hud = new HUD(hudContainer, store);
+const assets = new AssetLoader();
+const unsubscribeAssets = assets.subscribe(() => hud.setAssetStatuses(assets.getStatuses()));
+hud.setAssetStatuses(assets.getStatuses());
 let scene: SceneManager | undefined;
 let presenter: ScenePresenter | undefined;
 let placement: PlacementController | undefined;
@@ -28,12 +32,14 @@ try {
     resetButton.disabled = false;
     hud.setReady(true);
   });
-  presenter = new ScenePresenter(scene, store);
+  presenter = new ScenePresenter(scene, store, assets);
   placement = new PlacementController(scene, presenter, store, (message, error) => hud.showFeedback(message, error));
   resetButton.addEventListener('click', () => scene?.resetCamera(), { signal: listeners.signal });
+  void assets.preload();
 } catch (error: unknown) {
   placement?.dispose();
   presenter?.dispose();
+  assets.dispose();
   scene?.dispose();
   hud.setReady(false);
   status.setAttribute('role', 'alert');
@@ -43,8 +49,10 @@ try {
 
 function dispose(): void {
   listeners.abort();
+  unsubscribeAssets();
   placement?.dispose();
   presenter?.dispose();
+  assets.dispose();
   hud.dispose();
   scene?.dispose();
 }

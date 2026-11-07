@@ -14,6 +14,7 @@
 - src/scene 负责渲染、坐标转换和拾取；src/ui 通过 store 更新界面。
 - 逻辑 x 向东、y 向北，对应世界 X、-Z；单位和中心偏移统一在 scene/coordinates.ts。
 - 整个场景只有一个渲染循环；卸载和 HMR 必须释放相机控制、监听器、几何体、材质和 renderer。
+- src/data/assetConfig.ts 只登记已经提供的模型；AssetLoader 是 GLB 共享几何体、材质和纹理的所有者，删除单栋建筑不释放缓存资源。来源与哈希见 docs/ASSET_RECORD.md。
 
 ## 验收记录
 
@@ -28,3 +29,4 @@
 - tests/pointerGesture.test.ts：5 CSS 像素阈值及拖出再拖回不误建造；真实拾取与相机冲突还需浏览器验收。
 - tests/economy.test.ts：逐占地格污染、预览一致性、设施距离、满意度、净收益、完整性、评分与称号；非法布局不能获胜。
 - tests/submission.test.ts：提交/继续/重置状态边界、结果期间禁止编辑、撤销快照保留及移动/删除后的派生指标重算。
+- tests/assetLoader.test.ts：根路径/非根路径、模型比例与贴地、并发缓存与克隆、缺失/失败状态、HTML 误返回、退订及晚到资源释放；真实 GLB 和贴图显示仍需浏览器验收。

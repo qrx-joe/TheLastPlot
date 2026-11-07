@@ -1,6 +1,7 @@
 import { BUILDINGS, BUILDING_TYPES, ECONOMY, GAME_CONFIG, isBuildingType } from '../data/gameConfig';
 import type { GameAction } from '../domain/types';
 import type { GameStore } from '../state/gameStore';
+import type { AssetStatus } from '../scene/AssetLoader';
 
 /** 读取 store 的派生结果；不在界面重算收益、污染、满意度或评分。 */
 export class HUD {
@@ -40,7 +41,7 @@ export class HUD {
       <p id="placement-feedback" class="placement-feedback" role="status">选择建筑后，点击网格放置。</p>
       <button type="button" data-action="submit" class="submit-planning">提交规划</button>
       <p id="planning-requirements" class="hud-hint"></p>
-      <p class="hud-hint">当前建筑使用几何占位模型。</p>`;
+      <p id="asset-status" class="hud-hint" role="status"></p>`;
     const dialog = document.createElement('dialog');
     dialog.id = 'planning-result';
     dialog.setAttribute('aria-labelledby', 'planning-result-title');
@@ -68,6 +69,15 @@ export class HUD {
     const node = this.element<HTMLElement>('#placement-feedback');
     node.textContent = message;
     node.classList.toggle('placement-feedback--error', error);
+  }
+
+  public setAssetStatuses(statuses: readonly AssetStatus[]): void {
+    this.element('#asset-status').textContent = statuses.map(({ type, phase }) => {
+      const label = phase === 'ready' ? 'Lux3D 已加载'
+        : phase === 'failed' ? '加载失败，使用占位模型'
+          : phase === 'loading' || phase === 'pending' ? '加载中，暂用占位模型' : '使用占位模型';
+      return `${BUILDINGS[type].name}：${label}`;
+    }).join('；');
   }
 
   public dispose(): void {

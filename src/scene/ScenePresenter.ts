@@ -4,14 +4,14 @@ import {
   PlaneGeometry, SphereGeometry,
 } from 'three';
 import { BUILDINGS, BUILDING_TYPES, GAME_CONFIG } from '../data/gameConfig';
+import { MODEL_HEIGHT } from '../data/assetConfig';
 import { footprintCells } from '../domain/grid';
 import type { BuildingInstance, BuildingType, ValidationResult } from '../domain/types';
 import type { GameStore } from '../state/gameStore';
 import { cellToWorld, GROUND_Y } from './coordinates';
 import type { SceneManager } from './SceneManager';
 import { SpatialOverlay } from './SpatialOverlay';
-
-const MODEL_HEIGHT: Record<BuildingType, number> = { factory: 1.5, house: 1, park: 0.8, shop: 0.8 };
+import type { AssetLoader } from './AssetLoader';
 
 /** 只呈现 store 数据；几何模型、选择代理、预览各自独立，不反推游戏占地。 */
 export class ScenePresenter {
@@ -33,10 +33,11 @@ export class ScenePresenter {
   private readonly treeMaterial = new MeshStandardMaterial({ color: '#4f7551', roughness: 1 });
   private readonly darkMaterial = new MeshStandardMaterial({ color: '#6e685a', roughness: 1 });
   private readonly unsubscribe: () => void;
+  private readonly unsubscribeAssets: () => void;
   private readonly spatial: SpatialOverlay;
   private lastPlaced: readonly BuildingInstance[] | null = null;
 
-  constructor(private readonly manager: SceneManager, private readonly store: GameStore) {
+  constructor(private readonly manager: SceneManager, private readonly store: GameStore, private readonly assets: AssetLoader) {
     this.spatial = new SpatialOverlay(manager.scene);
     const capacity = Math.max(...BUILDING_TYPES.map((type) => BUILDINGS[type].width * BUILDINGS[type].depth));
     for (let i = 0; i < capacity; i += 1) {
@@ -50,6 +51,10 @@ export class ScenePresenter {
     this.outline.renderOrder = 4;
     manager.scene.add(this.models, this.proxies, this.preview, this.outline);
     this.unsubscribe = store.subscribe(() => this.render());
+    this.unsubscribeAssets = assets.subscribe(() => {
+      this.lastPlaced = null;
+      this.render();
+    });
     this.render();
   }
 
@@ -77,6 +82,7 @@ export class ScenePresenter {
 
   public dispose(): void {
     this.unsubscribe();
+    this.unsubscribeAssets();
     this.spatial.dispose();
     this.manager.scene.remove(this.models, this.proxies, this.preview, this.outline);
     this.models.clear();
@@ -119,6 +125,8 @@ export class ScenePresenter {
   }
 
   private createModel(type: BuildingType): Group {
+    const loaded = this.assets.instantiate(type);
+    if (loaded) return loaded;
     const group = new Group();
     const material = this.buildingMaterials[type];
     const addBox = (x: number, y: number, z: number, width: number, height: number, depth: number, paint = material): void => {
