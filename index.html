@@ -15,20 +15,24 @@
           <p class="eyebrow">THE LAST PLOT</p>
           <h1>最后一块地</h1>
         </div>
-        <span class="preview-label">地块预览</span>
+        <span class="preview-label">布局练习</span>
       </header>
 
-      <section class="viewport" aria-label="地块预览">
-        <div id="scene" class="scene"></div>
-        <div class="scene-toolbar">
-          <p id="scene-status" role="status">正在准备地块…</p>
-          <button id="reset-camera" type="button" disabled>复位视角</button>
-        </div>
-      </section>
+      <div class="workspace">
+        <section class="viewport" aria-label="地块编辑区">
+          <div id="scene" class="scene"></div>
+          <div class="scene-toolbar">
+            <p id="scene-status" role="status">正在准备地块…</p>
+            <button id="reset-camera" type="button" disabled>复位视角</button>
+          </div>
+        </section>
+        <aside id="hud" class="hud" aria-label="建筑与布局操作">正在准备建筑操作…</aside>
+      </div>
 
       <footer class="controls-hint">
-        <span>拖动旋转</span>
-        <span>滚轮缩放</span>
+        <span>点击放置或选中</span>
+        <span>拖动旋转 · 滚轮缩放</span>
+        <span>Esc 取消</span>
       </footer>
       <noscript>请启用 JavaScript 后查看三维地块。</noscript>
     </main>

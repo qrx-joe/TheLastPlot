@@ -1,25 +1,41 @@
 import { GAME_CONFIG } from './data/gameConfig';
 import { SceneManager } from './scene/SceneManager';
+import { ScenePresenter } from './scene/ScenePresenter';
+import { PlacementController } from './scene/PlacementController';
+import { createGameStore } from './state/gameStore';
+import { HUD } from './ui/HUD';
 import './styles/main.css';
 
 const container = document.querySelector<HTMLElement>('#scene');
 const status = document.querySelector<HTMLElement>('#scene-status');
 const resetButton = document.querySelector<HTMLButtonElement>('#reset-camera');
+const hudContainer = document.querySelector<HTMLElement>('#hud');
 
-if (!container || !status || !resetButton) {
+if (!container || !status || !resetButton || !hudContainer) {
   throw new Error('地块页面缺少必要的挂载节点。');
 }
 
 const listeners = new AbortController();
+const store = createGameStore();
+const hud = new HUD(hudContainer, store);
 let scene: SceneManager | undefined;
+let presenter: ScenePresenter | undefined;
+let placement: PlacementController | undefined;
 
 try {
   scene = new SceneManager(container, () => {
     status.textContent = `${GAME_CONFIG.gridSize}×${GAME_CONFIG.gridSize} 地块已就绪`;
     resetButton.disabled = false;
+    hud.setReady(true);
   });
+  presenter = new ScenePresenter(scene, store);
+  placement = new PlacementController(scene, presenter, store, (message, error) => hud.showFeedback(message, error));
   resetButton.addEventListener('click', () => scene?.resetCamera(), { signal: listeners.signal });
 } catch (error: unknown) {
+  placement?.dispose();
+  presenter?.dispose();
+  scene?.dispose();
+  hud.setReady(false);
   status.setAttribute('role', 'alert');
   status.textContent = '三维场景无法启动，请使用支持 WebGL2 的 Chrome 或 Edge，并检查浏览器图形加速设置。';
   console.error('无法初始化三维地块：', error);
@@ -27,6 +43,9 @@ try {
 
 function dispose(): void {
   listeners.abort();
+  placement?.dispose();
+  presenter?.dispose();
+  hud.dispose();
   scene?.dispose();
 }
 

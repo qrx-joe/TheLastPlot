@@ -3,7 +3,8 @@
 ## 入口与工具链
 
 - 采用 Vite + TypeScript strict + Three.js + 原生 HTML/CSS；包管理器为 npm，提交 package-lock.json。
-- 安装：npm ci；开发：npm run dev；检查：npm run typecheck；生产构建：npm run build；生产预览：npm run preview。
+- 安装：npm ci；开发：npm run dev；检查：npm run typecheck；测试：npm test；生产构建：npm run build；生产预览：npm run preview。
+- Node 版本要求以 package.json engines 为准，当前同时满足 Vite/Vitest；Vitest 最多运行两个 worker，类型检查包含 src 和 tests。
 - 浏览器首测为 Windows Chrome/Edge，需 WebGL2。阶段范围与规则依据见 docs/PRD.md、docs/TECH_SPEC.md、docs/COLLABORATION_RUNBOOK.md。
 
 ## 层与边界
@@ -19,3 +20,9 @@
 - 按用户当前指定阶段实现，先验证类型、构建和相关浏览器交互，再提交；不要跳阶段宣称游戏完成。
 - 将阶段结果记入 docs/reports，保留此前文档修订验收记录的历史范围；不要把纯规则脚本结果当作应用测试。
 - output 为本地交付及验证产物，不进入版本提交。真实 Lux3D 资产接入在 S3 验收，S0 不需要虚构模型记录。
+
+## 测试地图
+
+- tests/grid.test.ts：占地、边界、坐标转换、放置冲突、配额与设施互斥。
+- tests/gameStore.test.ts：预算、动作、移动排除自身、失败不变、单步撤销和重置。
+- tests/pointerGesture.test.ts：5 CSS 像素阈值及拖出再拖回不误建造；真实拾取与相机冲突还需浏览器验收。

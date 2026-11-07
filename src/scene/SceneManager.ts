@@ -1,26 +1,30 @@
 import {
   BoxGeometry,
+  BufferGeometry,
   Color,
   DirectionalLight,
   HemisphereLight,
   Mesh,
   MeshStandardMaterial,
+  MeshBasicMaterial,
+  PlaneGeometry,
   PerspectiveCamera,
   Scene,
   WebGLRenderer,
 } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GAME_CONFIG } from '../data/gameConfig';
-import { cellToWorld } from './coordinates';
+import { cellToWorld, GROUND_Y } from './coordinates';
 
 /** 仅负责场景、资源和相机；不持有游戏状态，不计算经济规则。 */
 export class SceneManager {
-  private readonly scene = new Scene();
-  private readonly camera = new PerspectiveCamera(40, 1, 0.1, 80);
+  public readonly scene = new Scene();
+  public readonly camera = new PerspectiveCamera(40, 1, 0.1, 80);
+  public readonly ground: Mesh<PlaneGeometry, MeshBasicMaterial>;
   private readonly renderer: WebGLRenderer;
   private readonly controls: OrbitControls;
   private readonly resizeObserver: ResizeObserver;
-  private readonly geometries: BoxGeometry[] = [];
+  private readonly geometries: BufferGeometry[] = [];
   private readonly materials: MeshStandardMaterial[] = [];
   private disposed = false;
 
@@ -29,7 +33,7 @@ export class SceneManager {
     this.renderer = new WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.domElement.setAttribute('role', 'img');
-    this.renderer.domElement.setAttribute('aria-label', '5×5 三维地块，拖动旋转，滚轮缩放');
+    this.renderer.domElement.setAttribute('aria-label', `${GAME_CONFIG.gridSize}×${GAME_CONFIG.gridSize} 三维地块，点击放置或选中建筑，拖动旋转，滚轮缩放`);
     this.container.append(this.renderer.domElement);
     this.scene.background = new Color('#f4efe6');
 
@@ -51,6 +55,17 @@ export class SceneManager {
     this.scene.add(sunlight);
     this.createGround();
 
+    // 连续拾取面跨过视觉格缝；色彩写入关闭，不与格面争抢深度。
+    this.ground = new Mesh(
+      new PlaneGeometry(GAME_CONFIG.gridSize * GAME_CONFIG.cellSize, GAME_CONFIG.gridSize * GAME_CONFIG.cellSize),
+      new MeshBasicMaterial({ colorWrite: false, depthWrite: false }),
+    );
+    this.ground.name = 'ground';
+    this.ground.rotation.x = -Math.PI / 2;
+    this.ground.position.y = GROUND_Y + 0.005;
+    this.scene.add(this.ground);
+    this.ground.updateMatrixWorld(true);
+
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(this.container);
     this.resize();
@@ -71,6 +86,15 @@ export class SceneManager {
     this.controls.reset();
   }
 
+  public get canvas(): HTMLCanvasElement {
+    return this.renderer.domElement;
+  }
+
+  public onCameraChange(listener: () => void): () => void {
+    this.controls.addEventListener('change', listener);
+    return () => this.controls.removeEventListener('change', listener);
+  }
+
   public dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
@@ -79,6 +103,8 @@ export class SceneManager {
     this.controls.dispose();
     for (const geometry of this.geometries) geometry.dispose();
     for (const material of this.materials) material.dispose();
+    this.ground.geometry.dispose();
+    this.ground.material.dispose();
     this.scene.clear();
     this.renderer.dispose();
     this.renderer.domElement.remove();
@@ -101,7 +127,7 @@ export class SceneManager {
     this.scene.add(base);
 
     // 25 格共享几何体和两种材质；细缝显示格界，逻辑单位仍为完整的 1 格。
-    const tileGeometry = new BoxGeometry(GAME_CONFIG.cellSize - 0.035, 0.06, GAME_CONFIG.cellSize - 0.035);
+    const tileGeometry = new BoxGeometry(GAME_CONFIG.cellSize - 0.035, GROUND_Y, GAME_CONFIG.cellSize - 0.035);
     const tileMaterials = [
       new MeshStandardMaterial({ color: '#c0c9ac', roughness: 1 }),
       new MeshStandardMaterial({ color: '#b9c3a3', roughness: 1 }),
@@ -114,7 +140,7 @@ export class SceneManager {
         const world = cellToWorld({ x, y });
         const tile = new Mesh(tileGeometry, tileMaterials[(x + y) % tileMaterials.length]);
         tile.name = `cell-${x}-${y}`;
-        tile.position.set(world.x, 0.03, world.z);
+        tile.position.set(world.x, GROUND_Y / 2, world.z);
         this.scene.add(tile);
       }
     }

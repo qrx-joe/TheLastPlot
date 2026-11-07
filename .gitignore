@@ -2,6 +2,7 @@
 /dist/
 /output/
 /.sites-runtime/
+/.vitest/
 /.DS_Store
 *.log
 .env
