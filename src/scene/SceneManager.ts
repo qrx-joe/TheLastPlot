@@ -15,6 +15,7 @@ import {
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GAME_CONFIG } from '../data/gameConfig';
 import { cellToWorld, GROUND_Y } from './coordinates';
+import { resetCameraView } from './cameraView';
 
 /** 仅负责场景、资源和相机；不持有游戏状态，不计算经济规则。 */
 export class SceneManager {
@@ -22,7 +23,7 @@ export class SceneManager {
   public readonly camera = new PerspectiveCamera(40, 1, 0.1, 80);
   public readonly ground: Mesh<PlaneGeometry, MeshBasicMaterial>;
   private readonly renderer: WebGLRenderer;
-  private readonly controls: OrbitControls;
+  private readonly controls: OrbitControls<PerspectiveCamera>;
   private readonly resizeObserver: ResizeObserver;
   private readonly geometries: BufferGeometry[] = [];
   private readonly materials: MeshStandardMaterial[] = [];
@@ -83,7 +84,7 @@ export class SceneManager {
   }
 
   public resetCamera(): void {
-    this.controls.reset();
+    resetCameraView(this.controls);
   }
 
   public get canvas(): HTMLCanvasElement {

@@ -41,13 +41,14 @@ npm run preview
 - src/scene：相机、灯光、地块、坐标转换、拾取、占地/污染预览、世界方向、GLB 缓存/克隆与占位回退；模型归一化不改变逻辑占地，只有一个渲染循环。
 - src/state/gameStore.ts：不可变状态、动作校验、单步撤销、intro/playing/result 阶段与派生指标读取接口。
 - src/ui：HUD 展示建筑选择、数量、即时指标、编辑和结果；MissionDialog 管理首次委托与查阅说明，通过 store 派发 START，不复制规则。
-- tests：7 个文件、96 项定向测试，覆盖开始边界、编辑、经济规则、结果状态和资产路径/归一化/缓存/回退/释放；最多使用两个 Vitest worker。
+- tests：8 个文件、99 项定向测试，覆盖开始边界、编辑、相机复位、经济规则、结果状态和资产路径/归一化/缓存/回退/释放；最多使用两个 Vitest worker。
 - [开发文档](docs/README.md)：产品规则、技术规范和阶段验收。
 - [S0 验收记录](docs/reports/2026-11-08-s0-bootstrap.md)：实际构建、浏览器检查和当前限制。
 - [S1 验收记录](docs/reports/2026-11-08-s1-grid-placement.md)：编辑流程、测试结果和当前限制。
 - [S2 验收记录](docs/reports/2026-11-08-s2-economy.md)：经济规则、结算状态与实际浏览器验证。
 - [S3 验收记录](docs/reports/2026-11-08-s3-lux3d-assets.md)：真实 GLB 接入、根路径/非根路径和故障注入验证。
 - [S4 验收记录](docs/reports/2026-11-08-s4-playable-ui.md)：开始与说明、两种设施通关、失败后调整、响应布局和故障回退。
+- [游戏复测与相机修复](docs/reports/2026-11-08-game-playtest.md)：独立试玩、复位惯性及窄屏取景回归。
 - [资产来源](docs/ASSET_RECORD.md)：真实 Lux3D 工厂、生成参数、文件哈希与证据位置。
 
 真实工厂位于 public/models/factory.glb，浏览器 URL 根据 BASE_URL 拼接为 models/factory.glb。文件约 7.29 MB，贴图全部内嵌。桌面以三维地块为中心，小高度窗口在侧栏内滚动说明；窄屏改为上下排列，需要在建筑卡与地块之间滚动。下一阶段 S5 准备发布与交付；当前尚未部署，真实手机、性能和首次玩家可用性测试尚未完成。

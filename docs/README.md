@@ -4,6 +4,8 @@
 
 当前工程阶段：S4 已完成，见 [S4 玩家界面与闭环验收](reports/2026-11-08-s4-playable-ui.md)。此前记录见 [S3 Lux3D 真实资产验收](reports/2026-11-08-s3-lux3d-assets.md)、[资产来源记录](ASSET_RECORD.md)、[S2 经济与结算验收](reports/2026-11-08-s2-economy.md)、[S1 网格编辑验收](reports/2026-11-08-s1-grid-placement.md)、[S0 工程验收](reports/2026-11-08-s0-bootstrap.md)。
 
+最新复测：[游戏试玩与相机复位修复](reports/2026-11-08-game-playtest.md)。
+
 - [产品需求](PRD.md)
 - [技术规范](TECH_SPEC.md)
 - [协作与交付手册](COLLABORATION_RUNBOOK.md)
