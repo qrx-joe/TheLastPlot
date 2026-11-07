@@ -40,7 +40,7 @@ export class SpatialOverlay {
     const wind = new ArrowHelper(new Vector3(1, 0, 0), new Vector3(-edge + 0.25, GROUND_Y + 0.1, edge + 0.5), 1.4, '#b87835', 0.22, 0.14);
     this.arrows.push(north, wind);
     this.root.add(this.cells, north, wind);
-    this.label('北 N', new Vector3(-edge - 0.5, 0.12, edge - 1.8), 1.1, '#486378');
+    this.label('北 N', new Vector3(-edge - 0.9, 0.12, edge + 0.4), 1.1, '#486378');
     this.label('西 → 东', new Vector3(-edge + 1, 0.16, edge + 1.1), 1.5, '#91612e');
     scene.add(this.root);
   }

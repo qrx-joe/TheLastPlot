@@ -6,5 +6,11 @@ export function building(id: string, type: BuildingType, x: number, y: number): 
 }
 
 export function stateWith(...placed: BuildingInstance[]): GameState {
-  return { ...createGameStore().getState(), placed };
+  return { ...startedStore().getState(), placed };
+}
+
+export function startedStore() {
+  const store = createGameStore();
+  store.dispatch({ type: 'START' });
+  return store;
 }

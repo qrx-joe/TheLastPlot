@@ -55,8 +55,9 @@ export interface Evaluation {
   readonly explanation: string;
 }
 
-/** 开始页在 S4 接入；当前直接进入编辑，并支持提交及继续调整。 */
+/** 玩家阶段由 store 管理，说明弹窗不持有另一份游戏状态。 */
 export type GameAction =
+  | { readonly type: 'START' }
   | { readonly type: 'SELECT_TYPE'; readonly buildingType: BuildingType | null }
   | { readonly type: 'SELECT_BUILDING'; readonly id: string | null }
   | { readonly type: 'BEGIN_MOVE'; readonly id: string }

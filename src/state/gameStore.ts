@@ -21,7 +21,7 @@ function copyBuilding(building: BuildingInstance): BuildingInstance {
   return Object.freeze({ id: building.id, type: building.type, origin: Object.freeze({ ...building.origin }) });
 }
 
-function emptyState(): GameState {
+function emptyState(phase: GameState['phase']): GameState {
   return Object.freeze({
     gridSize: GAME_CONFIG.gridSize,
     initialBudget: GAME_CONFIG.initialBudget,
@@ -29,13 +29,13 @@ function emptyState(): GameState {
     selectedType: null,
     selectedBuildingId: null,
     mode: 'select',
-    phase: 'playing',
+    phase,
   });
 }
 
 /** 唯一状态与单步快照；不读写 DOM/Three.js，预算从当前布局派生。 */
 export function createGameStore(): GameStore {
-  let state = emptyState();
+  let state = emptyState('intro');
   let undoSnapshot: readonly BuildingInstance[] | null = null;
   const listeners = new Set<(state: GameState) => void>();
 
@@ -61,9 +61,14 @@ export function createGameStore(): GameStore {
       return () => { listeners.delete(listener); };
     },
     dispatch: (action) => {
+      if (action.type === 'START') {
+        if (state.phase !== 'intro') return fail('规划已经开始。');
+        update({ phase: 'playing' });
+        return ok;
+      }
       if (action.type === 'RESET') {
         undoSnapshot = null;
-        update(emptyState());
+        update(emptyState('playing'));
         return ok;
       }
       if (action.type === 'CONTINUE') {
@@ -71,7 +76,7 @@ export function createGameStore(): GameStore {
         update({ phase: 'playing' });
         return ok;
       }
-      if (state.phase !== 'playing') return fail('请先继续调整布局。');
+      if (state.phase !== 'playing') return fail(state.phase === 'intro' ? '请先开始规划。' : '请先继续调整布局。');
 
       switch (action.type) {
         case 'SUBMIT': {

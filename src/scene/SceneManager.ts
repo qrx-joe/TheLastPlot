@@ -114,6 +114,8 @@ export class SceneManager {
     const { width, height } = this.container.getBoundingClientRect();
     if (width <= 0 || height <= 0) return;
     this.camera.aspect = width / height;
+    // 窄画布拉远取景，不改变世界方向或用户的旋转/缩放距离。
+    this.camera.zoom = Math.min(1, this.camera.aspect / 1.05);
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
   }

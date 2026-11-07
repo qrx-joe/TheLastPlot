@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { createGameStore } from '../src/state/gameStore';
 import type { GameAction } from '../src/domain/types';
-import { building } from './helpers';
+import { building, startedStore } from './helpers';
 
 function completeStore(losing = false) {
-  const store = createGameStore();
+  const store = startedStore();
   const placed = losing
     ? [building('f', 'factory', 0, 0), building('h1', 'house', 2, 0), building('h2', 'house', 3, 0), building('p', 'park', 3, 3)]
     : [building('f', 'factory', 0, 0), building('h1', 'house', 0, 4), building('h2', 'house', 4, 4), building('p', 'park', 1, 2)];
@@ -14,7 +13,7 @@ function completeStore(losing = false) {
 
 describe('结算与编辑状态流转', () => {
   it('拒绝不完整提交，保持原状态与撤销记录', () => {
-    const store = createGameStore();
+    const store = startedStore();
     store.dispatch({ type: 'PLACE', building: building('h', 'house', 0, 0) });
     const before = store.getState();
     expect(store.dispatch({ type: 'SUBMIT' }).valid).toBe(false);
@@ -45,6 +44,7 @@ describe('结算与编辑状态流转', () => {
     store.dispatch({ type: 'SUBMIT' });
     const before = store.getState();
     const actions: GameAction[] = [
+      { type: 'START' },
       { type: 'DELETE', id: 'p' }, { type: 'MOVE', id: 'h1', origin: { x: 0, y: 3 } },
       { type: 'SELECT_BUILDING', id: 'h1' }, { type: 'SELECT_TYPE', buildingType: 'shop' },
       { type: 'BEGIN_MOVE', id: 'h1' }, { type: 'CANCEL' }, { type: 'UNDO' }, { type: 'SUBMIT' },

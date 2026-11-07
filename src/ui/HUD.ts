@@ -11,22 +11,25 @@ export class HUD {
 
   constructor(private readonly container: HTMLElement, private readonly store: GameStore) {
     container.innerHTML = `
-      <div class="budget-line"><span>剩余预算</span><strong id="remaining-budget"></strong></div>
-      <div class="city-metrics">
+      <div class="hud-overview"><p class="eyebrow">你的规划</p><div class="city-metrics">
+        <div><span>剩余预算</span><strong id="remaining-budget"></strong></div>
         <div><span>当期净收益</span><strong id="city-net"></strong></div>
         <div><span>平均满意度</span><strong id="city-satisfaction"></strong></div>
       </div>
-      <p class="hud-hint">目标：满意度 ≥ ${ECONOMY.targets.satisfaction}，净收益 ≥ ${ECONOMY.targets.net}</p>
-      <p class="pollution-legend"><span aria-hidden="true">▧</span> 橙色斜线：下风向住宅 −${ECONOMY.pollution.penalty}<br>西风吹向东；工厂预览显示拟放位置。</p>
-      <h2>选择建筑</h2>
-      <p class="hud-hint">${BUILDINGS.factory.limit} 工厂 + ${BUILDINGS.house.limit} 住宅 + 公园或商店</p>
+      <p class="hud-hint goal-line">目标：满意度 ≥ ${ECONOMY.targets.satisfaction} · 净收益 ≥ ${ECONOMY.targets.net}</p>
+      <p id="building-progress" class="hud-hint"></p></div>
+      <div class="hud-scroll"><h2>把建筑放进小镇</h2>
+      <p class="hud-hint">先选卡片，再点地块。公园与商店二选一。</p>
       <div class="building-cards">${BUILDING_TYPES.map((type) => `
         <button type="button" class="building-card" data-building-type="${type}" aria-pressed="false">
-          <strong>${BUILDINGS[type].name}</strong>
+          <span class="card-heading"><strong>${BUILDINGS[type].name}</strong><span class="card-asset"></span><span class="card-count"></span></span>
           <span>${BUILDINGS[type].width}×${BUILDINGS[type].depth} · ${BUILDINGS[type].cost} 预算</span>
-          <span class="card-count"></span><span class="card-caption"></span>
+          <span>净收益 ${BUILDINGS[type].net > 0 ? '+' : ''}${BUILDINGS[type].net}${type === 'house' ? ` · 满意度 ${ECONOMY.baseSatisfaction}` : type === 'park' || type === 'shop' ? ` · 附近 +${BUILDINGS[type].satisfactionBonus}` : ` · 下风向 −${ECONOMY.pollution.penalty}`}</span>
+          <span class="card-caption"></span>
         </button>`).join('')}
       </div>
+      <p id="facility-hint" class="hud-hint"></p>
+      <div class="selection-panel">
       <p id="selected-building" class="selected-building"></p>
       <p id="selected-house-feedback" class="hud-hint" hidden></p>
       <div class="edit-actions">
@@ -34,14 +37,17 @@ export class HUD {
         <button type="button" data-action="delete">删除</button>
         <button type="button" data-action="cancel">取消</button>
       </div>
+      </div>
+      <p class="pollution-legend"><span aria-hidden="true">▧</span> 西风 → 东：橙色斜线内的住宅 −${ECONOMY.pollution.penalty}。<br>设施 ${ECONOMY.facilityRange} 格内加成，距离只算横竖。</p>
+      <details class="asset-details"><summary>建筑模型状态</summary><p id="asset-status" class="hud-hint" role="status"></p></details>
+      </div><div class="hud-bottom">
       <div class="history-actions">
         <button type="button" data-action="undo">撤销一步</button>
         <button type="button" data-action="reset">重新开始</button>
       </div>
       <p id="placement-feedback" class="placement-feedback" role="status">选择建筑后，点击网格放置。</p>
       <button type="button" data-action="submit" class="submit-planning">提交规划</button>
-      <p id="planning-requirements" class="hud-hint"></p>
-      <p id="asset-status" class="hud-hint" role="status"></p>`;
+      <p id="planning-requirements" class="hud-hint"></p></div>`;
     const dialog = document.createElement('dialog');
     dialog.id = 'planning-result';
     dialog.setAttribute('aria-labelledby', 'planning-result-title');
@@ -67,11 +73,17 @@ export class HUD {
 
   public showFeedback(message: string, error = false): void {
     const node = this.element<HTMLElement>('#placement-feedback');
-    node.textContent = message;
+    if (node.textContent !== message) node.textContent = message;
     node.classList.toggle('placement-feedback--error', error);
   }
 
   public setAssetStatuses(statuses: readonly AssetStatus[]): void {
+    for (const { type, phase } of statuses) {
+      const badge = this.element(`[data-building-type="${type}"] .card-asset`);
+      badge.textContent = phase === 'ready' ? 'Lux3D' : phase === 'failed' ? '失败·占位' : phase === 'unprovided' ? '占位' : '加载中';
+      badge.title = phase === 'ready' ? 'Lux3D 模型已加载' : phase === 'failed' ? '模型加载失败，使用占位模型' : phase === 'unprovided' ? '使用几何占位模型' : '模型加载中，暂用占位模型';
+      badge.classList.toggle('asset-failed', phase === 'failed');
+    }
     this.element('#asset-status').textContent = statuses.map(({ type, phase }) => {
       const label = phase === 'ready' ? 'Lux3D 已加载'
         : phase === 'failed' ? '加载失败，使用占位模型'
@@ -101,6 +113,8 @@ export class HUD {
     this.element('#remaining-budget').textContent = `${this.store.getRemainingBudget()} / ${GAME_CONFIG.initialBudget}`;
     this.element('#city-net').textContent = String(evaluation.monthlyNet);
     this.element('#city-satisfaction').textContent = evaluation.averageSatisfaction === null ? '—' : evaluation.averageSatisfaction.toFixed(1);
+    this.element('#building-progress').textContent = `工厂 ${this.store.getBuildingCount('factory')}/${BUILDINGS.factory.limit} · 住宅 ${this.store.getBuildingCount('house')}/${BUILDINGS.house.limit} · 设施 ${this.store.getBuildingCount('park') + this.store.getBuildingCount('shop')}/1`;
+    this.element('#facility-hint').textContent = this.store.getBuildingCount('park') + this.store.getBuildingCount('shop') > 0 ? '更换设施：先删除现有设施，再选另一种。' : '公园偏向生活质量，商店偏向收入。';
     for (const type of BUILDING_TYPES) {
       const card = this.element<HTMLButtonElement>(`[data-building-type="${type}"]`);
       const reason = this.store.getSelectionError(type);
@@ -110,7 +124,9 @@ export class HUD {
       const count = card.querySelector('.card-count');
       const caption = card.querySelector('.card-caption');
       if (count) count.textContent = `${this.store.getBuildingCount(type)} / ${BUILDINGS[type].limit}`;
-      if (caption) caption.textContent = reason ?? (state.selectedType === type ? '点击地块放置' : '');
+      if (caption) caption.textContent = reason
+        ? reason.includes('数量上限') ? '已建满' : reason.includes('先删除') ? '先删除现有设施' : reason
+        : state.selectedType === type ? '点击地块放置' : '';
     }
     const selected = state.placed.find((building) => building.id === state.selectedBuildingId);
     this.element('#selected-building').textContent = selected
