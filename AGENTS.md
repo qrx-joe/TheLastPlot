@@ -28,6 +28,7 @@
 - tests/gameStore.test.ts：预算、动作、移动排除自身、失败不变、单步撤销和重置。
 - tests/pointerGesture.test.ts：5 CSS 像素阈值及拖出再拖回不误建造；真实拾取与相机冲突还需浏览器验收。
 - tests/cameraView.test.ts：真实 OrbitControls 的复位惯性清除、后续帧稳定、阻尼设置保留及窄画布取景比例。
+- tests/projection.test.ts：世界坐标到画布像素的投影锚点、相机后方返回 null、NDC 换算与零宽高边界，供画布内操作条定位。
 - tests/economy.test.ts：逐占地格污染、预览一致性、设施距离、满意度、净收益、完整性、评分与称号；非法布局不能获胜。
 - tests/submission.test.ts：提交/继续/重置状态边界、结果期间禁止编辑、撤销快照保留及移动/删除后的派生指标重算。
 - tests/intro.test.ts：初始 intro 禁止编辑、START 只接受一次、重置统一回到空 playing；说明弹窗的键盘与焦点另做浏览器验收。

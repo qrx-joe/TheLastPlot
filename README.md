@@ -47,7 +47,7 @@ Vercel 配置使用 Vite、`npm ci`、`npm run build`，发布目录为 `dist`�
 - src/scene：相机、灯光、地块、坐标转换、拾取、占地/污染预览、世界方向、GLB 缓存/克隆与占位回退；模型归一化不改变逻辑占地，只有一个渲染循环。
 - src/state/gameStore.ts：不可变状态、动作校验、单步撤销、intro/playing/result 阶段与派生指标读取接口。
 - src/ui：HUD 展示建筑选择、数量、即时指标、编辑和结果；MissionDialog 管理首次委托与查阅说明，通过 store 派发 START，不复制规则。
-- tests：8 个文件、99 项定向测试，覆盖开始边界、编辑、相机复位、经济规则、结果状态和资产路径/归一化/缓存/回退/释放；最多使用两个 Vitest worker。
+- tests：9 个文件、104 项定向测试，覆盖开始边界、编辑、相机复位、经济规则、结果状态、资产路径/归一化/缓存/回退/释放和画布内操作条投影；最多使用两个 Vitest worker。
 - [开发文档](docs/README.md)：产品规则、技术规范和阶段验收。
 - [S0 验收记录](docs/reports/2026-11-08-s0-bootstrap.md)：实际构建、浏览器检查和当前限制。
 - [S1 验收记录](docs/reports/2026-11-08-s1-grid-placement.md)：编辑流程、测试结果和当前限制。
