@@ -1,7 +1,7 @@
 import {
   BoxGeometry, ConeGeometry, CylinderGeometry, EdgesGeometry, Group,
   LineBasicMaterial, LineSegments, Mesh, MeshBasicMaterial, MeshStandardMaterial,
-  PlaneGeometry, SphereGeometry,
+  PlaneGeometry, SphereGeometry, Vector3,
 } from 'three';
 import { BUILDINGS, BUILDING_TYPES, GAME_CONFIG } from '../data/gameConfig';
 import { MODEL_HEIGHT } from '../data/assetConfig';
@@ -9,6 +9,8 @@ import { footprintCells } from '../domain/grid';
 import type { BuildingInstance, BuildingType, ValidationResult } from '../domain/types';
 import type { GameStore } from '../state/gameStore';
 import { cellToWorld, GROUND_Y } from './coordinates';
+import { worldToScreen } from './projection';
+import type { ScreenPoint } from './projection';
 import type { SceneManager } from './SceneManager';
 import { SpatialOverlay } from './SpatialOverlay';
 import type { AssetLoader } from './AssetLoader';
@@ -60,6 +62,19 @@ export class ScenePresenter {
 
   public getSelectionProxies(): readonly Mesh[] {
     return this.proxies.children.filter((object): object is Mesh => object instanceof Mesh);
+  }
+
+  /** 选中建筑顶面中心的画布像素坐标，供画布内浮动操作条定位；未选中或画布不可见时为 null。 */
+  public getSelectionScreenAnchor(): ScreenPoint | null {
+    const state = this.store.getState();
+    const selected = state.placed.find((building) => building.id === state.selectedBuildingId);
+    if (!selected) return null;
+    const { width, depth } = BUILDINGS[selected.type];
+    const center = cellToWorld({ x: selected.origin.x + (width - 1) / 2, y: selected.origin.y + (depth - 1) / 2 });
+    const top = new Vector3(center.x, GROUND_Y + MODEL_HEIGHT[selected.type] + 0.12, center.z);
+    const rect = this.manager.canvas.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return null;
+    return worldToScreen(top, this.manager.camera, rect.width, rect.height);
   }
 
   public showPreview(candidate: BuildingInstance | null, validation?: ValidationResult): void {

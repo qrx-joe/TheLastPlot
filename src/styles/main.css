@@ -119,6 +119,45 @@ h1 {
   font-size: 11px;
 }
 
+.selection-toolbar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  gap: 4px;
+  padding: 5px 6px;
+  border: 1px solid #d8d2bf;
+  border-radius: 10px;
+  background: #fffdf7;
+  box-shadow: 0 4px 14px rgba(60, 55, 40, 0.18);
+  transform: translate(-50%, calc(-100% - 12px));
+  pointer-events: none;
+}
+
+.selection-toolbar::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -4.5px;
+  width: 8px;
+  height: 8px;
+  background: #fffdf7;
+  border-right: 1px solid #d8d2bf;
+  border-bottom: 1px solid #d8d2bf;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.selection-toolbar button {
+  padding: 6px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.selection-toolbar button[data-action='delete'] {
+  color: #a63d2f;
+}
+
 .hud {
   min-height: 0;
   display: flex;

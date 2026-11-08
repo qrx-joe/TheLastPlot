@@ -6,6 +6,7 @@ import { AssetLoader } from './scene/AssetLoader';
 import { createGameStore } from './state/gameStore';
 import { HUD } from './ui/HUD';
 import { MissionDialog } from './ui/MissionDialog';
+import { SelectionToolbar } from './ui/SelectionToolbar';
 import './styles/main.css';
 
 const container = document.querySelector<HTMLElement>('#scene');
@@ -28,6 +29,7 @@ hud.setAssetStatuses(assets.getStatuses());
 let scene: SceneManager | undefined;
 let presenter: ScenePresenter | undefined;
 let placement: PlacementController | undefined;
+let toolbar: SelectionToolbar | undefined;
 
 try {
   scene = new SceneManager(container, () => {
@@ -35,12 +37,21 @@ try {
     resetButton.disabled = false;
     hud.setReady(true);
     mission.setReady(true);
+    toolbar?.setReady(true);
   });
   presenter = new ScenePresenter(scene, store, assets);
   placement = new PlacementController(scene, presenter, store, (message, error) => hud.showFeedback(message, error));
+  toolbar = new SelectionToolbar(
+    container,
+    store,
+    () => presenter?.getSelectionScreenAnchor() ?? null,
+    (listener) => scene?.onCameraChange(listener) ?? (() => {}),
+    (message, error) => hud.showFeedback(message, error),
+  );
   resetButton.addEventListener('click', () => scene?.resetCamera(), { signal: listeners.signal });
   void assets.preload();
 } catch (error: unknown) {
+  toolbar?.dispose();
   placement?.dispose();
   presenter?.dispose();
   assets.dispose();
@@ -55,6 +66,7 @@ try {
 function dispose(): void {
   listeners.abort();
   unsubscribeAssets();
+  toolbar?.dispose();
   placement?.dispose();
   presenter?.dispose();
   assets.dispose();
