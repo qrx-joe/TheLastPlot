@@ -32,6 +32,11 @@
 
 代码已推送至 GitHub `qrx-joe/TheLastPlot`，Vercel 项目已关联该仓库，本次提交为首次经 Git 集成的生产部署（此前两次均为本机 CLI 直传）。发布验证结果见下节。
 
+### 发布验证结果（2026-11-08）
+
+- Git 集成部署 `the-last-plot-eh3q2ouhb` 构建成功（7 秒，Ready），生产域名已切换至该部署。
+- 生产域名四份 GLB（factory / house / shop / park）均返回 200；`npm run verify:release -- --url https://the-last-plot.vercel.app/` 通过：8 个文件、4 个模型、8 项 HTTP 内容校验。
+
 ## 待完成
 
 四个真实模型同时加载的浏览器完整回归、真实模型故障回退演练及视频/PDF 刷新尚未完成，不以文件检查与自动化测试替代浏览器验收。
