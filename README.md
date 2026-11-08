@@ -30,7 +30,13 @@ npm run build
 npm run preview
 ```
 
-生产构建输出到 dist；preview 仅用于本地验收。当前尚未部署。
+生产构建输出到 dist；preview 仅用于本地验收。正式试玩：[the-last-plot.vercel.app](https://the-last-plot.vercel.app/)。
+
+## 演示与部署准备
+
+已准备 160 秒的本机生产构建实录（中文字幕、无配音）和 6 页项目报告 PDF。录像展示失败后继续调整、公园与商店两种通关方案、移动、撤销和删除退款。文件与验证范围见[发布与演示材料记录](docs/reports/2026-11-08-release-preparation.md)。
+
+Vercel 配置使用 Vite、`npm ci`、`npm run build`，发布目录为 `dist`。已部署至 [the-last-plot.vercel.app](https://the-last-plot.vercel.app/)，线上 5 项资源内容校验与两种通关方案通过。后续在项目根目录运行 `vercel --prod` 发布，再用 `npm run verify:release -- --url https://the-last-plot.vercel.app/` 及浏览器检查结果。
 
 ## 结构
 
@@ -51,4 +57,4 @@ npm run preview
 - [游戏复测与相机修复](docs/reports/2026-11-08-game-playtest.md)：独立试玩、复位惯性及窄屏取景回归。
 - [资产来源](docs/ASSET_RECORD.md)：真实 Lux3D 工厂、生成参数、文件哈希与证据位置。
 
-真实工厂位于 public/models/factory.glb，浏览器 URL 根据 BASE_URL 拼接为 models/factory.glb。文件约 7.29 MB，贴图全部内嵌。桌面以三维地块为中心，小高度窗口在侧栏内滚动说明；窄屏改为上下排列，需要在建筑卡与地块之间滚动。下一阶段 S5 准备发布与交付；当前尚未部署，真实手机、性能和首次玩家可用性测试尚未完成。
+真实工厂位于 public/models/factory.glb，浏览器 URL 根据 BASE_URL 拼接为 models/factory.glb。文件约 7.29 MB，贴图全部内嵌。桌面以三维地块为中心，小高度窗口在侧栏内滚动说明；窄屏改为上下排列，需要在建筑卡与地块之间滚动。当前已上线并准备好本机操作视频与项目报告 PDF；真实手机、性能和首次玩家可用性测试尚未完成。

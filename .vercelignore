@@ -1,0 +1,9 @@
+/node_modules/
+/dist/
+/output/
+/docs/
+/.sites-runtime/
+/.vitest/
+.env
+.env.*
+*.log

@@ -3,8 +3,11 @@
 /output/
 /.sites-runtime/
 /.vitest/
+/.vercel/
 /.DS_Store
 *.log
 .env
 .env.*
 !.env.example
+
+.vercel

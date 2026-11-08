@@ -6,6 +6,8 @@
 
 最新复测：[游戏试玩与相机复位修复](reports/2026-11-08-game-playtest.md)。
 
+发布记录：[演示视频、项目报告与 Vercel 验收](reports/2026-11-08-release-preparation.md)。[正式 Demo](https://the-last-plot.vercel.app/) 已上线，5 项资源内容校验与两条通关路线通过；另有本机实际操作视频与项目报告 PDF。本轮没有制作路演 PPT 或进行参赛提交。
+
 - [产品需求](PRD.md)
 - [技术规范](TECH_SPEC.md)
 - [协作与交付手册](COLLABORATION_RUNBOOK.md)
@@ -17,4 +19,4 @@
 
 Word 阅读副本位于仅保存在本机的 output 目录，不随 Git 提交；仓库以 Markdown 为准。
 
-下一实现阶段：S5，准备发布验证、玩法说明与比赛交付材料；正式部署需落实用户授权的托管目标。工厂已经接入真实 Lux3D GLB，其他类型的占位状态如实显示，不以补齐所有模型作为后续阶段的前置条件。
+当前为 S5 交付准备，已完成 Vercel 部署、实际视频与项目报告 PDF；队伍信息及正式提交状态仍须核实。工厂已经接入真实 Lux3D GLB，其他类型的占位状态如实显示。
