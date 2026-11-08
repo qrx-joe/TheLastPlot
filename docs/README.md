@@ -6,9 +6,11 @@
 
 最新复测：[游戏试玩与相机复位修复](reports/2026-11-08-game-playtest.md)。
 
+最新交互：[选中建筑画布内浮动操作条验收](reports/2026-11-08-selection-toolbar.md)。
+
 最新资产：[住宅、商店、公园的 Lux3D 接入与整体验收](reports/2026-11-08-lux3d-buildings.md)。四类建筑均已取得真实贴图 GLB，住宅模型复用两次。
 
-发布记录：[演示视频、项目报告与 Vercel 验收](reports/2026-11-08-release-preparation.md)。[正式 Demo](https://the-last-plot.vercel.app/) 已上线，5 项资源内容校验与两条通关路线通过；另有本机实际操作视频与项目报告 PDF。本轮没有制作路演 PPT 或进行参赛提交。
+发布记录：[演示视频、项目报告与 Vercel 验收](reports/2026-11-08-release-preparation.md)。[正式 Demo](https://the-last-plot.vercel.app/) 已上线，5 项资源内容校验与两条通关路线通过。该轮未制作路演 PPT；路演材料与提交包已于当日后续定稿，见[路演材料与提交包定稿验收](reports/2026-11-08-pitch-submission-materials.md)（正式提交仍未完成）。
 
 - [产品需求](PRD.md)
 - [技术规范](TECH_SPEC.md)
