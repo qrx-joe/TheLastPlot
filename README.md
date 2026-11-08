@@ -1,6 +1,6 @@
 # 最后一块地 The Last Plot
 
-一款以空间规划与外部性取舍为主题的 3D 益智游戏。当前完成 S4：从小镇委托开始，在 5×5 地块中安排工厂、住宅与一项设施，观察收益、污染和满意度，提交后查看评分及未达标原因。支持移动、删除、单步撤销和继续调整。工厂使用真实 Lux3D 贴图 GLB；住宅、公园和商店仍使用有明确提示的几何占位模型。
+一款以空间规划与外部性取舍为主题的 3D 益智游戏。从小镇委托开始，在 5×5 地块中安排工厂、住宅与一项设施，观察收益、污染和满意度，提交后查看评分及未达标原因。支持移动、删除、单步撤销和继续调整。工厂、住宅、公园和商店均使用真实 Lux3D 贴图 GLB，住宅复用同一份模型；模型加载失败时显示明确的几何回退提示。
 
 ## 本地运行
 
@@ -34,9 +34,9 @@ npm run preview
 
 ## 演示与部署准备
 
-已准备 160 秒的本机生产构建实录（中文字幕、无配音）和 6 页项目报告 PDF。录像展示失败后继续调整、公园与商店两种通关方案、移动、撤销和删除退款。文件与验证范围见[发布与演示材料记录](docs/reports/2026-11-08-release-preparation.md)。
+演示视频与项目报告随资产版本更新，录像展示失败后继续调整、公园与商店两种通关方案、移动、撤销和删除退款。四类真实资产及最新材料见[追加资产验收](docs/reports/2026-11-08-lux3d-buildings.md)；[首次发布记录](docs/reports/2026-11-08-release-preparation.md)保留此前仅工厂使用真实模型的验证范围。
 
-Vercel 配置使用 Vite、`npm ci`、`npm run build`，发布目录为 `dist`。已部署至 [the-last-plot.vercel.app](https://the-last-plot.vercel.app/)，线上 5 项资源内容校验与两种通关方案通过。后续在项目根目录运行 `vercel --prod` 发布，再用 `npm run verify:release -- --url https://the-last-plot.vercel.app/` 及浏览器检查结果。
+Vercel 配置使用 Vite、`npm ci`、`npm run build`，发布目录为 `dist`。正式地址为 [the-last-plot.vercel.app](https://the-last-plot.vercel.app/)。后续在项目根目录运行 `vercel --prod` 发布，再用 `npm run verify:release -- --url https://the-last-plot.vercel.app/` 逐个检查入口资源与全部 GLB，并在浏览器检查两种通关方案。
 
 ## 结构
 
@@ -57,4 +57,4 @@ Vercel 配置使用 Vite、`npm ci`、`npm run build`，发布目录为 `dist`�
 - [游戏复测与相机修复](docs/reports/2026-11-08-game-playtest.md)：独立试玩、复位惯性及窄屏取景回归。
 - [资产来源](docs/ASSET_RECORD.md)：真实 Lux3D 工厂、生成参数、文件哈希与证据位置。
 
-真实工厂位于 public/models/factory.glb，浏览器 URL 根据 BASE_URL 拼接为 models/factory.glb。文件约 7.29 MB，贴图全部内嵌。桌面以三维地块为中心，小高度窗口在侧栏内滚动说明；窄屏改为上下排列，需要在建筑卡与地块之间滚动。当前已上线并准备好本机操作视频与项目报告 PDF；真实手机、性能和首次玩家可用性测试尚未完成。
+四份真实模型位于 public/models/{factory,house,park,shop}.glb，浏览器 URL 根据 BASE_URL 拼接。模型共约 28.53 MB，均内嵌 2K 贴图。桌面以三维地块为中心，小高度窗口在侧栏内滚动说明；窄屏改为上下排列，需要在建筑卡与地块之间滚动。真实手机、低配性能、慢网和首次玩家可用性测试尚未完成。

@@ -6,6 +6,8 @@
 
 最新复测：[游戏试玩与相机复位修复](reports/2026-11-08-game-playtest.md)。
 
+最新资产：[住宅、商店、公园的 Lux3D 接入与整体验收](reports/2026-11-08-lux3d-buildings.md)。四类建筑均已取得真实贴图 GLB，住宅模型复用两次。
+
 发布记录：[演示视频、项目报告与 Vercel 验收](reports/2026-11-08-release-preparation.md)。[正式 Demo](https://the-last-plot.vercel.app/) 已上线，5 项资源内容校验与两条通关路线通过；另有本机实际操作视频与项目报告 PDF。本轮没有制作路演 PPT 或进行参赛提交。
 
 - [产品需求](PRD.md)
@@ -19,4 +21,4 @@
 
 Word 阅读副本位于仅保存在本机的 output 目录，不随 Git 提交；仓库以 Markdown 为准。
 
-当前为 S5 交付准备，已完成 Vercel 部署、实际视频与项目报告 PDF；队伍信息及正式提交状态仍须核实。工厂已经接入真实 Lux3D GLB，其他类型的占位状态如实显示。
+当前为 S5 交付准备，包含 Vercel 部署、实际视频与项目报告 PDF；队伍信息及正式提交状态仍须核实。当前四类建筑均使用真实 Lux3D GLB；失败回退仍保留，历史阶段记录按当时的资产范围阅读。
