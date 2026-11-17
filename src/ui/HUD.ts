@@ -1,7 +1,11 @@
 import { BUILDINGS, BUILDING_TYPES, ECONOMY, GAME_CONFIG, isBuildingType } from '../data/gameConfig';
-import type { GameAction } from '../domain/types';
-import type { GameStore } from '../state/gameStore';
+import type { BuildingInstance, BuildingType, Evaluation, GameAction, GameState } from '../domain/types';
+import type { GameStore, SavedScheme } from '../state/gameStore';
 import type { AssetStatus } from '../scene/AssetLoader';
+
+function otherFacility(type: BuildingType): BuildingType {
+  return type === 'park' ? 'shop' : 'park';
+}
 
 /** 读取 store 的派生结果；不在界面重算收益、污染、满意度或评分。 */
 export class HUD {
@@ -18,7 +22,7 @@ export class HUD {
       </div>
       <p class="hud-hint goal-line">目标：满意度 ≥ ${ECONOMY.targets.satisfaction} · 净收益 ≥ ${ECONOMY.targets.net}</p>
       <p id="building-progress" class="hud-hint"></p></div>
-      <div class="hud-scroll"><h2>把建筑放进小镇</h2>
+      <div class="hud-scroll"><h2>把建筑放进城市</h2>
       <p class="hud-hint">先选卡片，再点地块。公园与商店二选一。</p>
       <div class="building-cards">${BUILDING_TYPES.map((type) => `
         <button type="button" class="building-card" data-building-type="${type}" aria-pressed="false">
@@ -52,9 +56,9 @@ export class HUD {
     dialog.id = 'planning-result';
     dialog.setAttribute('aria-labelledby', 'planning-result-title');
     dialog.innerHTML = `<h2 id="planning-result-title"></h2>
-      <p id="planning-result-summary"></p><p id="planning-result-score"></p>
-      <ul id="planning-result-errors"></ul><p id="planning-result-explanation"></p>
+      <div id="planning-result-body"></div>
       <div class="result-actions"><button type="button" data-action="continue" autofocus>继续调整</button>
+      <button type="button" data-action="keep-result" hidden></button>
       <button type="button" data-action="reset">重新开始</button></div>`;
     container.append(dialog);
     dialog.addEventListener('cancel', (event) => {
@@ -147,17 +151,106 @@ export class HUD {
       : evaluation.errors.join(' ');
     const dialog = this.element<HTMLDialogElement>('#planning-result');
     if (state.phase === 'result') {
-      this.element('#planning-result-title').textContent = evaluation.won ? '规划达标' : '还需调整';
-      this.element('#planning-result-summary').textContent = `平均满意度 ${evaluation.averageSatisfaction?.toFixed(1)} · 当期净收益 ${evaluation.monthlyNet} · 花费 ${evaluation.spending} · 剩余 ${evaluation.remainingBudget}`;
-      this.element('#planning-result-score').textContent = `综合评分 ${evaluation.score} / ${ECONOMY.score.maximum} · ${evaluation.title ?? '待调整'}`;
-      this.element('#planning-result-errors').replaceChildren(...evaluation.errors.map((error) => {
+      this.renderResult(state, evaluation, this.store.getSavedScheme());
+      if (!dialog.open) dialog.showModal();
+    } else if (dialog.open) dialog.close();
+  }
+
+  /** 结算弹窗：无保留方案或再次提交同类设施时展示单份，换设施提交后并排对比两份。 */
+  private renderResult(state: GameState, evaluation: Evaluation, saved: SavedScheme | null): void {
+    this.element('#planning-result-title').textContent = evaluation.won ? '规划达标' : '还需调整';
+    const facility = state.placed.find((building) => building.type === 'park' || building.type === 'shop')?.type ?? null;
+    const comparing = saved !== null && facility !== null && facility !== saved.facilityType;
+    this.element<HTMLDialogElement>('#planning-result').classList.toggle('result-compare', comparing);
+    const body = this.element('#planning-result-body');
+    body.replaceChildren();
+    if (comparing && saved) {
+      const grid = document.createElement('div');
+      grid.className = 'scheme-grid';
+      grid.append(this.buildSchemeCard(saved.evaluation, saved.placed, '已保留'), this.buildSchemeCard(evaluation, state.placed, '当前'));
+      body.append(this.buildDeltaLine(evaluation, saved), grid);
+    } else {
+      body.append(this.buildSchemeCard(evaluation, state.placed, null));
+      if (saved && facility !== null && facility === saved.facilityType) {
+        const hint = document.createElement('p');
+        hint.className = 'scheme-hint';
+        hint.textContent = `已保留${BUILDINGS[saved.facilityType].name}方案，结果继续有效。换成${BUILDINGS[otherFacility(saved.facilityType)].name}再提交，可查看两份方案对比。`;
+        body.append(hint);
+      }
+    }
+    const keepButton = this.element<HTMLButtonElement>('[data-action="keep-result"]');
+    keepButton.hidden = saved !== null || facility === null;
+    if (facility !== null) keepButton.textContent = `保留${BUILDINGS[facility].name}方案，试试${BUILDINGS[otherFacility(facility)].name}`;
+  }
+
+  /** 逐栋原因按各自布局取住宅坐标；不建立跨方案对应关系，重建住宅也各算各的。 */
+  private buildSchemeCard(evaluation: Evaluation, placed: readonly BuildingInstance[], tag: string | null): HTMLElement {
+    const card = document.createElement('article');
+    card.className = 'scheme-card';
+    if (tag === '当前') card.classList.add('scheme-card--current');
+    const facility = placed.find((building) => building.type === 'park' || building.type === 'shop');
+    const header = document.createElement('header');
+    const name = document.createElement('h3');
+    name.textContent = facility ? `${BUILDINGS[facility.type].name}方案` : '当前方案';
+    const status = document.createElement('span');
+    status.className = evaluation.won ? 'scheme-status scheme-status--ok' : 'scheme-status scheme-status--bad';
+    status.textContent = evaluation.won ? '达标' : '未达标';
+    header.append(name);
+    if (tag) {
+      const badge = document.createElement('span');
+      badge.className = 'scheme-tag';
+      badge.textContent = tag;
+      header.append(badge);
+    }
+    header.append(status);
+    card.append(header);
+    const metrics = document.createElement('p');
+    metrics.className = 'scheme-metrics';
+    metrics.textContent = `平均满意度 ${evaluation.averageSatisfaction?.toFixed(1) ?? '—'} · 净收益 ${evaluation.monthlyNet} · 剩余预算 ${evaluation.remainingBudget}`;
+    card.append(metrics);
+    const score = document.createElement('p');
+    score.className = 'scheme-score';
+    score.textContent = `综合评分 ${evaluation.score} / ${ECONOMY.score.maximum} · ${evaluation.title ?? '待调整'}`;
+    card.append(score);
+    const origins = new Map(placed.map((building) => [building.id, building.origin] as const));
+    const houses = document.createElement('ul');
+    houses.className = 'scheme-houses';
+    for (const house of evaluation.houses) {
+      const item = document.createElement('li');
+      const origin = origins.get(house.id);
+      let text = `住宅 (${origin?.x ?? '?'},${origin?.y ?? '?'}) · 满意度 ${house.satisfaction}`;
+      if (house.pollutionPenalty > 0) text += ` · 下风向 −${house.pollutionPenalty}`;
+      if (house.facilityBonus > 0 && facility) text += ` · ${BUILDINGS[facility.type].name} +${house.facilityBonus}`;
+      item.textContent = text;
+      houses.append(item);
+    }
+    card.append(houses);
+    if (evaluation.errors.length) {
+      const errors = document.createElement('ul');
+      errors.className = 'scheme-errors';
+      errors.replaceChildren(...evaluation.errors.map((error) => {
         const item = document.createElement('li');
         item.textContent = error;
         return item;
       }));
-      this.element('#planning-result-explanation').textContent = evaluation.explanation;
-      if (!dialog.open) dialog.showModal();
-    } else if (dialog.open) dialog.close();
+      card.append(errors);
+    }
+    const explanation = document.createElement('p');
+    explanation.className = 'scheme-explanation';
+    explanation.textContent = evaluation.explanation;
+    card.append(explanation);
+    return card;
+  }
+
+  private buildDeltaLine(current: Evaluation, saved: SavedScheme): HTMLElement {
+    const line = document.createElement('p');
+    line.className = 'scheme-delta';
+    const format = (value: number, digits = 0) => `${value >= 0 ? '+' : '−'}${Math.abs(value).toFixed(digits)}`;
+    const satisfaction = current.averageSatisfaction !== null && saved.evaluation.averageSatisfaction !== null
+      ? `满意度 ${format(current.averageSatisfaction - saved.evaluation.averageSatisfaction, 1)}，`
+      : '';
+    line.textContent = `相比已保留的${BUILDINGS[saved.facilityType].name}方案，${satisfaction}净收益 ${format(current.monthlyNet - saved.evaluation.monthlyNet)}。`;
+    return line;
   }
 
   private readonly onClick = (event: MouseEvent): void => {
@@ -182,6 +275,13 @@ export class HUD {
       case 'reset': this.dispatch({ type: 'RESET' }, `已重新开始，预算恢复 ${GAME_CONFIG.initialBudget}，撤销记录已清空。`); break;
       case 'submit': this.dispatch({ type: 'SUBMIT' }, '已按当前布局完成评估。'); break;
       case 'continue': this.dispatch({ type: 'CONTINUE' }, '已返回布局，建筑与撤销记录保持不变。'); break;
+      case 'keep-result': {
+        const facility = this.store.getState().placed.find((building) => building.type === 'park' || building.type === 'shop');
+        if (facility) {
+          this.dispatch({ type: 'KEEP_RESULT' }, `已保留${BUILDINGS[facility.type].name}方案。先删除现有${BUILDINGS[facility.type].name}，再选${BUILDINGS[otherFacility(facility.type)].name}摆放，即可对比两种方案。`);
+        }
+        break;
+      }
     }
   };
 

@@ -9,9 +9,17 @@ export interface GameStore {
   getEvaluation(): Evaluation;
   getBuildingCount(type: BuildingType): number;
   getSelectionError(type: BuildingType): string | null;
+  getSavedScheme(): SavedScheme | null;
   canUndo(): boolean;
   subscribe(listener: (state: GameState) => void): () => void;
   dispatch(action: GameAction): ValidationResult;
+}
+
+/** 保留方案的只读快照：设施类型、提交时的布局和同一次求值结果；独立于撤销历史。 */
+export interface SavedScheme {
+  readonly facilityType: BuildingType;
+  readonly placed: readonly BuildingInstance[];
+  readonly evaluation: Evaluation;
 }
 
 const ok: ValidationResult = { valid: true };
@@ -37,6 +45,7 @@ function emptyState(phase: GameState['phase']): GameState {
 export function createGameStore(): GameStore {
   let state = emptyState('intro');
   let undoSnapshot: readonly BuildingInstance[] | null = null;
+  let savedScheme: SavedScheme | null = null;
   const listeners = new Set<(state: GameState) => void>();
 
   function update(patch: Partial<GameState>): void {
@@ -55,6 +64,7 @@ export function createGameStore(): GameStore {
     getEvaluation: () => evaluateCity(state),
     getBuildingCount: (type) => state.placed.filter((building) => building.type === type).length,
     getSelectionError: (type) => selectionError(state, type),
+    getSavedScheme: () => savedScheme,
     canUndo: () => undoSnapshot !== null,
     subscribe: (listener) => {
       listeners.add(listener);
@@ -68,11 +78,24 @@ export function createGameStore(): GameStore {
       }
       if (action.type === 'RESET') {
         undoSnapshot = null;
+        savedScheme = null;
         update(emptyState('playing'));
         return ok;
       }
       if (action.type === 'CONTINUE') {
         if (state.phase !== 'result') return fail('当前没有待关闭的结果。');
+        update({ phase: 'playing' });
+        return ok;
+      }
+      if (action.type === 'KEEP_RESULT') {
+        // 一次性保留：只在完整结算且尚无保留方案时接受；保存后立即回到编辑阶段。
+        if (state.phase !== 'result') return fail('请先提交规划，再保留方案。');
+        if (savedScheme) return fail('已保留首个方案，重新开始后才能再保留。');
+        const evaluation = evaluateCity(state);
+        if (!evaluation.complete) return fail('当前布局不完整，无法保留方案。');
+        const facility = state.placed.find((building) => building.type === 'park' || building.type === 'shop');
+        if (!facility) return fail('当前布局缺少设施，无法保留方案。');
+        savedScheme = { facilityType: facility.type, placed: state.placed.map(copyBuilding), evaluation };
         update({ phase: 'playing' });
         return ok;
       }

@@ -68,4 +68,5 @@ export type GameAction =
   | { readonly type: 'UNDO' }
   | { readonly type: 'RESET' }
   | { readonly type: 'SUBMIT' }
-  | { readonly type: 'CONTINUE' };
+  | { readonly type: 'CONTINUE' }
+  | { readonly type: 'KEEP_RESULT' };

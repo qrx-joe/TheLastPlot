@@ -12,9 +12,9 @@ export class MissionDialog {
     this.dialog.id = 'mission-dialog';
     this.dialog.setAttribute('aria-labelledby', 'mission-title');
     this.dialog.innerHTML = `
-      <p class="eyebrow">一份小镇委托 · 约 2–4 分钟</p>
+      <p class="eyebrow">一份城市委托 · 约 2–4 分钟</p>
       <h2 id="mission-title">把最后一块地，留给怎样的生活？</h2>
-      <p class="mission-story">小镇只剩这片 ${GAME_CONFIG.gridSize}×${GAME_CONFIG.gridSize} 的土地。让工厂带来收入，也给居民留一个住得舒心的地方。</p>
+      <p class="mission-story">城市已经没有多余的土地。<br>你获得了最后一块可开发地。<br>你可以让它创造更多财富，也可以让它成为更适合人们生活的地方。<br>但这一次，你不能什么都要。</p>
       <div class="mission-goals"><div><strong>${GAME_CONFIG.initialBudget}</strong><span>建造预算</span></div>
         <div><strong>≥ ${ECONOMY.targets.satisfaction}</strong><span>平均满意度</span></div>
         <div><strong>≥ ${ECONOMY.targets.net}</strong><span>当期净收益</span></div></div>

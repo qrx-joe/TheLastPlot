@@ -516,6 +516,99 @@ dialog p, dialog li {
   background: #526a42;
 }
 
+#planning-result.result-compare {
+  width: min(700px, calc(100vw - 36px));
+}
+
+.scheme-delta {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  font-weight: 600;
+  background: #eef0e6;
+  border-radius: 6px;
+}
+
+.scheme-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+.scheme-card {
+  padding: 12px 14px;
+  border: 1px solid #dfe1d4;
+  border-radius: 8px;
+}
+
+.scheme-card--current {
+  border-color: #526a42;
+}
+
+.scheme-card header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.scheme-card h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.scheme-tag {
+  padding: 1px 8px;
+  font-size: 11px;
+  color: #59614f;
+  background: #eef0e6;
+  border-radius: 999px;
+}
+
+.scheme-status {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.scheme-status--ok {
+  color: #526a42;
+}
+
+.scheme-status--bad {
+  color: #a44436;
+}
+
+.scheme-metrics {
+  margin: 8px 0 0;
+  font-weight: 600;
+}
+
+.scheme-score {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: #69715e;
+}
+
+.scheme-houses, .scheme-errors {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.scheme-errors {
+  color: #a44436;
+}
+
+.scheme-explanation {
+  margin: 8px 0 0;
+  color: #69715e;
+}
+
+.scheme-hint {
+  margin: 12px 0 0;
+  color: #59614f;
+}
+
 @media (min-width: 1500px) {
   .workspace {
     grid-template-columns: minmax(0, 1fr) 360px;
@@ -596,5 +689,9 @@ dialog p, dialog li {
 
   dialog h2 {
     font-size: 22px;
+  }
+
+  .scheme-grid {
+    grid-template-columns: 1fr;
   }
 }
